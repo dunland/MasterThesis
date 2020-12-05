@@ -439,6 +439,9 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 
 CC_Type Globals::int_to_cc_type(int integer)
 {
+
+	// TODO: This has to be set for each instrument accordingly.
+	
 	switch (integer)
 	{
 	case 18:

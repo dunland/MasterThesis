@@ -44,18 +44,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
   case (RESET_AND_PROCEED_SCORE):
     if (Score::beat_sum.average_smooth >= Score::beat_sum.activation_thresh) // score proceed criterion reached
     {
-      Globals::println_to_console("regularity height > 10: reset!");
-      Score::step++; // go to next score step
-      Score::setup = true;
-      for (auto &instrument : instruments)
-        for (int j = 0; j < 16; j++)
-          instrument->topography.a_16[j] = 0;
-
-      Globals::println_to_console("all instrument topographies were reset.");
-
-      for (int j = 0; j < 16; j++)
-        Score::beat_sum.a_16[j] = 0; // reset topography
-      Score::beat_sum.average_smooth = 0;
+      Score::proceed_to_next_step(instruments);
     }
 
     else // not enough strokes to proceed yet.

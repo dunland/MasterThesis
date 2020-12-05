@@ -67,7 +67,7 @@ public:
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   int snr_thresh = 3;         // threshold for signal-to-noise-ratio to be smoothened
-  int activation_thresh = 10; // threshold in average_smooth to activate next action
+  int activation_thresh = 4; // threshold in average_smooth to activate next action
   int average_smooth = 0;
   int regular_sum = 0;
 

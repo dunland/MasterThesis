@@ -71,7 +71,7 @@ void setup()
                 // cc_plot:
                 instr.cc_plot.drawMode = instr.plot.BARPLOT;
                 instr.cc_plot.set_ticks(200,1);
-                // instr.cc_plot.drawMode = instr.plot.LINES;
+                instr.cc_plot.strokeColor = color(i * (255/list_of_instruments.length), 100, 100);
                 instr.cc_plot.draw_title = false;
                 instr.cc_plot.draw_labels = false;
                 instr.cc_plot.draw_xticks = false;

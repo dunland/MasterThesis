@@ -28,6 +28,26 @@ void Score::add_bassNote(int note)
     Globals::println_to_console("]");
 }
 
+void Score::proceed_to_next_step(std::vector<Instrument *> instruments)
+{
+    // increase step:
+    Score::step++; // go to next score step
+    Score::setup = true;
+
+    // reset instrument topographies:
+    for (auto &instrument : instruments)
+        for (int j = 0; j < 16; j++)
+            instrument->topography.a_16[j] = 0;
+
+    // reset overall beat sum:
+    for (int j = 0; j < 16; j++)
+        Score::beat_sum.a_16[j] = 0; // reset topography
+    Score::beat_sum.average_smooth = 0;
+
+    Globals::println_to_console("regularity height > 10: reset!");
+    Globals::println_to_console("all instrument topographies were reset.");
+}
+
 void Score::set_notes(std::vector<int> list)
 {
     // clear notes list:
@@ -91,9 +111,30 @@ void Score::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSe
 void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
     if (notes.size() > 0)
+    {
+        // turn previously played note off:
+        int prev_idx_temp = (note_idx > 0) ? note_idx - 1 : notes.size() - 1;
+        synth->sendNoteOff(notes[prev_idx_temp], MIDI);
+
+        // play nex note:
         synth->sendNoteOn(notes[note_idx], MIDI);
+    }
     else
         Globals::println_to_console("cannot play MIDI note, because Score::notes is empty.");
+}
+
+// play note at a set position in bar:
+void Score::playNoteAtPosition(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos)
+{
+    if (Globals::current_beat_pos == note_change_pos)
+    {
+        // turn previously played note off:
+        int prev_idx_temp = (note_idx > 0) ? note_idx - 1 : notes.size() - 1;
+        synth->sendNoteOff(notes[prev_idx_temp], MIDI);
+
+        // play nex note:
+        synth->sendNoteOn(notes[note_idx], MIDI);
+    }
 }
 
 void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)

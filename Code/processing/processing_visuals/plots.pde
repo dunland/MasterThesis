@@ -36,6 +36,7 @@ boolean draw_yticks = true;
 
 color axisColor = color(255, 255, 255);
 color pointsColor = color(47, 169, 222);
+color strokeColor = color(200);
 
 // create plot with values only
 Plot(float x_min_in, float x_max_in, float y_min_in, float y_max_in)
@@ -109,7 +110,7 @@ void draw(int x, int y)
                 {
                         for (int i = 1; i<values.size(); i++)
                         {
-                                stroke(200);
+                                stroke(strokeColor);
                                 fill(pointsColor);
                                 rectMode(CORNERS);
                                 rect(values.get(i-1).x * x_tick_spacer, axis_height - values.get(i-1).y * (axis_height / y_max), values.get(i).x * x_tick_spacer, axis_height);

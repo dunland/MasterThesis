@@ -28,11 +28,15 @@ public:
 
     static void add_bassNote(int note); // adds a NOTE to notes[]
 
+    static void proceed_to_next_step(std::vector<Instrument *> instruments); // turns previous note off, plays one note steadily
+
 
     // MODES:
-    static void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+    static void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_iterator = 0); // initiates a continuous bass note from score
 
     static void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):
+
+    static void playNoteAtPosition(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int); // play note only once (turn on never off):
 
     static void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
 

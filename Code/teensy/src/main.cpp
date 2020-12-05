@@ -31,7 +31,7 @@ Instrument *kick;
 Instrument *tom2;
 Instrument *standtom;
 Instrument *crash1;
-Instrument *cowbell;
+// Instrument *cowbell;
 Instrument *ride;
 // Instrument *tom1;
 // Instrument *crash2;
@@ -152,16 +152,16 @@ void setup()
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
   // instantiate instruments:
-  snare = new Instrument(A5, Snare);
+  snare = new Instrument(A3, Snare);
   hihat = new Instrument(A6, Hihat);
   kick = new Instrument(A1, Kick);
   tom2 = new Instrument(A7, Tom2);
   standtom = new Instrument(A2, Standtom1);
-  cowbell = new Instrument(A3, Cowbell);
+  // cowbell = new Instrument(A3, Cowbell);
   crash1 = new Instrument(A0, Crash1);
   ride = new Instrument(A4, Ride);
 
-  instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1, ride};
+  instruments = {snare, hihat, kick, tom2, standtom, crash1, ride};
 
   // initialize arrays:
   for (auto &instrument : instruments)
@@ -185,7 +185,7 @@ void setup()
   standtom->setup_sensitivity(200, 10, 10, false); // (2020-11-11) // 60, 20 (2020-08-27)
   tom2->setup_sensitivity(100, 9, 10, false);      // 300, 18
   kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
-  cowbell->setup_sensitivity(80, 15, 10, false);
+  // cowbell->setup_sensitivity(80, 15, 10, false);
   crash1->setup_sensitivity(300, 2, 5, true);
   ride->setup_sensitivity(400, 2, 5, true);
   snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
@@ -237,7 +237,7 @@ void setup()
   ride->midi_settings.synth = mKorg;
   tom2->midi_settings.synth = mKorg;
   standtom->midi_settings.synth = mKorg;
-  cowbell->midi_settings.synth = mKorg;
+  // cowbell->midi_settings.synth = mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
   // snare->midi_settings.active_note = 50;
@@ -252,7 +252,7 @@ void setup()
   // assign startup instrument effects:
   hihat->effect = TapTempo;
   crash1->effect = Monitor;
-  cowbell->effect = Monitor;
+  // cowbell->effect = Monitor;
   ride->effect = Monitor;
 
   // -------------------------- START TIMERS --------------------------
@@ -440,7 +440,7 @@ void loop()
     switch (Score::step)
     {
 
-    case 0: // notesAndEffects_locrianMode
+    case 0: // cymbalsEffectsChange
     {
       if (Score::setup)
       {
@@ -459,15 +459,38 @@ void loop()
         tom2->set_notes(locrian_mode);
         standtom->set_notes(locrian_mode);
 
+        // proceed in note lists:
+        note_idx = (note_idx + 1) % locrian_mode.size();
+        Score::note_idx = (Score::note_idx + 1) % Score::notes.size();
+
+        // set locrian mode
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
+
+        // start bass note:
+        Score::playSingleNote(mKorg, MIDI);
+
+        // leave setup:
+        Score::setup = false;
+      }
+    }
+    break;
+
+    case 1: // drumsPlayNotes_cymbalNoteIteration
+
+      if (Score::setup)
+      {
+        // add locrian mode
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
+
+        // set crash1 to change main note:
+        crash1->setup_midi(None, mKorg);
+        crash1->set_effect(MainNoteIteration);
+
         // drums play on Volca:
         kick->setup_midi(None, volca);
         snare->setup_midi(None, volca);
         tom2->setup_midi(None, volca);
         standtom->setup_midi(None, volca);
-
-        // proceed in note lists:
-        note_idx = (note_idx + 1) % locrian_mode.size();
-        Score::note_idx = (Score::note_idx + 1) % Score::notes.size();
 
         kick->midi_settings.active_note = kick->midi_settings.notes[note_idx];
         kick->set_effect(PlayMidi);
@@ -481,43 +504,13 @@ void loop()
         standtom->midi_settings.active_note = standtom->midi_settings.notes[(note_idx + 2) % standtom->midi_settings.notes.size()];
         standtom->set_effect(PlayMidi);
 
-        // add locrian mode
-        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
-
-        // start bass note:
-        Score::playSingleNote(mKorg, MIDI);
-
-        // leave setup:
-        Score::setup = false;
-      }
-
-      // change volca, with minimum of 50:
-      // if (volca->cutoff >= 50 && Globals::current_beat_pos )
-      // {
-      // if (Score::beat_sum.average_smooth > 3)
-      // {
-      //   int cutoff_val = min(Score::beat_sum.average_smooth * 7, 127);
-      //   volca->sendControlChange(LFO_Rate, cutoff_val, MIDI);
-      // }
-      // }
-    }
-    break;
-
-    case 1: // cymbalNoteIteration
-
-      if (Score::setup)
-      {
-        // add locrian mode
-        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
-
-        // set crash1 to change main note:
-        crash1->setup_midi(None, mKorg);
-        crash1->set_effect(MainNoteIteration);
-
         // define interval when to change notes:
         // rhythmic_iterator = int(random(32));
         // Globals::print_to_console("rhythmic_iterator = ");
         // Globals::println_to_console(rhythmic_iterator);
+
+        // set locrian mode:
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
 
         // proceed in note lists:
         note_idx = (note_idx + 1) % locrian_mode.size();
@@ -531,6 +524,45 @@ void loop()
       }
 
       // Score::playRhythmicNotes(mKorg, MIDI, rhythmic_iterator);
+
+      break;
+
+    case 2: // automatic bass notes
+
+      // main notes: locrian 1, 2, 3, 3 (intervals 0, 3, 5, 5)
+
+      if (Score::setup)
+      {
+        // drums play on Volca:
+        kick->setup_midi(None, volca);
+        snare->setup_midi(None, volca);
+        tom2->setup_midi(None, volca);
+        standtom->setup_midi(None, volca);
+
+        kick->midi_settings.active_note = kick->midi_settings.notes[note_idx];
+        kick->set_effect(PlayMidi);
+
+        snare->midi_settings.active_note = snare->midi_settings.notes[note_idx] + 12;
+        snare->set_effect(PlayMidi);
+
+        tom2->midi_settings.active_note = tom2->midi_settings.notes[(note_idx + 1) % tom2->midi_settings.notes.size()];
+        tom2->set_effect(PlayMidi);
+
+        standtom->midi_settings.active_note = standtom->midi_settings.notes[(note_idx + 2) % standtom->midi_settings.notes.size()];
+        standtom->set_effect(PlayMidi);
+
+        // set locrian mode (last note twice!)
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2], locrian_mode[2]});
+
+        // proceed in note lists:
+        note_idx = (note_idx + 1) % locrian_mode.size();
+        Score::note_idx = (Score::note_idx + 1) % Score::notes.size();
+
+        // leave setup:
+        Score::setup = false;
+      }
+
+      Score::playNoteAtPosition(mKorg, MIDI, 0);
 
       break;
 
@@ -612,14 +644,6 @@ void loop()
       //       Score::setup = false;
       //     }
       //     break;
-
-      //   case 3:
-      //     static int note_iterator;
-      //     if (Score::setup)
-      //     {
-      //       note_iterator = int(random(32));
-      //     }
-      //       Score::playRhythmicNotes(mKorg, MIDI, note_iterator); // random rhythmic beatz
 
       // break;
 
